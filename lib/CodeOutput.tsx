@@ -1,5 +1,6 @@
-import { Code, Grid, Note } from '@geist-ui/react';
+import { Code, Grid, Note, useToasts } from '@geist-ui/react';
 import Copy from '@geist-ui/react-icons/copy';
+import { useEffect, useState } from 'react';
 
 
 interface Props {
@@ -12,19 +13,31 @@ interface Props {
 }
 
 const CodeOutput: React.FC<Props> = ({ name, args, savedRegisters, addComments, copya0, saveRA }) => {
+    const [, setToasts] = useToasts();
+
     const blockComment = createBlockComment(name, args, savedRegisters, copya0);
-    // highlights the code on user click
+    // highlights the code on user click, and copies it
+    // if no permissions, give error
     // https://developer.mozilla.org/en-US/docs/Web/API/Selection/selectAllChildren
     const handleClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         window.getSelection()?.selectAllChildren(e.currentTarget);
+
+        try {
+            const permissions = navigator.permissions.query({ name: "clipboard-write" });
+            console.log(permissions);
+        } catch (e) {
+            console.log(e);
+            setToasts({
+                type: 'error',
+                text: 'You do not have permission to copy this code',
+            });
+        }
     }
 
     return (
         <Grid.Container>
             <Grid xs={24}>
-                <Note type='success' style={{ width: '100%' }}>
-                    Click on the code to highlight it.
-                </Note>
+                <ClipboardNote />
             </Grid>
             <Grid xs={24}>
                 <Code
@@ -42,6 +55,34 @@ const CodeOutput: React.FC<Props> = ({ name, args, savedRegisters, addComments, 
             </Grid>
         </Grid.Container>
 
+    )
+}
+
+// Checks if the navigator.permissions API is supported
+// if not, it displays that the user has to click to highlight text
+// if it is, it displays that the user can copy the code
+const ClipboardNote: React.FC = () => {
+    const [supported, setSupported] = useState(false);
+
+    // async useEffect 
+    // https://stackoverflow.com/a/53572588
+    useEffect(() => {
+        async function getPermissions() {
+            if (navigator.permissions) {
+                const permissions = await navigator.permissions.query({ name: "clipboard-write" });
+                setSupported(permissions.state === 'granted');
+            } else {
+                setSupported(false);
+            }
+        }
+
+        getPermissions()
+    }, [])
+
+    return (
+        <Note>
+            {supported ? 'Click on the highlighted code to copy it' : 'Click on the code to highlight it'}
+        </Note>
     )
 }
 
