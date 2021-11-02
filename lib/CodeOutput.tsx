@@ -97,6 +97,7 @@ const stack = (push: boolean, savedRegisters: number, saveRA: boolean) => {
 
     // if we save RA, we have to save an extra register
     const actualRegisters = saveRA ? savedRegisters + 1 : savedRegisters;
+    let stackCounter = 0;
 
     let res = comment + '\n';
     res += push ? `	addi	sp, sp, -${actualRegisters * 4}\n` : '';
@@ -104,12 +105,13 @@ const stack = (push: boolean, savedRegisters: number, saveRA: boolean) => {
     // save/restore ra (if needed)
     if (saveRA) {
         res += `	${instr}	ra, 0(sp)\n`;
+        stackCounter++;
     }
 
     // add register stuff
-    const start = saveRA ? 1 : 0;
-    for (let i = start; i < actualRegisters; i++) {
-        res += `	${instr}	s${i}, ${4 * i}(sp)\n`;
+    for (let i = 0; i < savedRegisters; i++) {
+        res += `	${instr}	s${i}, ${4 * stackCounter}(sp)\n`;
+        stackCounter++;
     }
 
     res += push ? '' : `	addi	sp, sp, ${actualRegisters * 4}\n`;
