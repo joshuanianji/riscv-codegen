@@ -1,11 +1,10 @@
 import type { AppProps } from 'next/app'
-import { GeistProvider, CssBaseline } from '@geist-ui/react'
+import { ThemeProvider } from '@lib/ThemeProvider'
 
 const MyApp = ({ Component, pageProps }: AppProps) => (
-  <GeistProvider>
-    <CssBaseline /> {/* Normalize CSS */}
+  <ThemeProvider>
     <Component {...pageProps} />
-  </GeistProvider>
+  </ThemeProvider>
 )
 
 export default MyApp
