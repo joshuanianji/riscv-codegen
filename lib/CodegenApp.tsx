@@ -90,10 +90,10 @@ const Options: React.FC<OptionsProps> = (props) => (
         <Grid xs={24}>
             <Grid.Container gap={1} justify='center'>
                 <Grid xs={24}>
-                    <Checkbox checked={props.addComments} onChange={(e) => props.setAddComments(e.target.checked)}>Add Comments</Checkbox>
+                    <Checkbox checked={props.addComments} onChange={(e) => props.setAddComments(e.target.checked)} scale={1.25}>Add Comments</Checkbox>
                 </Grid>
                 <Grid xs={24}>
-                    <Checkbox checked={props.saveRA} onChange={(e) => props.setSaveRA(e.target.checked)}>
+                    <Checkbox checked={props.saveRA} onChange={(e) => props.setSaveRA(e.target.checked)} scale={1.25}>
                         Save <Code>ra</Code>
                     </Checkbox>
                 </Grid>

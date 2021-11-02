@@ -1,5 +1,6 @@
 import { Code, Grid, Note, useToasts } from '@geist-ui/react';
 import Copy from '@geist-ui/react-icons/copy';
+import { getNavPermissions } from '@lib/NavigatorPermissionsProvider';
 import { useEffect, useState } from 'react';
 
 
@@ -13,24 +14,31 @@ interface Props {
 }
 
 const CodeOutput: React.FC<Props> = ({ name, args, savedRegisters, addComments, copya0, saveRA }) => {
+    const { supported } = getNavPermissions();
     const [, setToasts] = useToasts();
 
     const blockComment = createBlockComment(name, args, savedRegisters, copya0);
+    const codeStr = code(name, addComments, blockComment, savedRegisters, saveRA, copya0);
+
     // highlights the code on user click, and copies it
     // if no permissions, give error
     // https://developer.mozilla.org/en-US/docs/Web/API/Selection/selectAllChildren
-    const handleClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    const handleClick = async (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         window.getSelection()?.selectAllChildren(e.currentTarget);
 
-        try {
-            const permissions = navigator.permissions.query({ name: "clipboard-write" });
-            console.log(permissions);
-        } catch (e) {
-            console.log(e);
-            setToasts({
-                type: 'error',
-                text: 'You do not have permission to copy this code',
-            });
+        if (supported) {
+            try {
+                await navigator.clipboard.writeText(codeStr);
+                setToasts({
+                    type: 'success',
+                    text: 'Successfully copied to clipboard!',
+                });
+            } catch (e) {
+                setToasts({
+                    type: 'error',
+                    text: 'Unexpected error! ' + e,
+                });
+            }
         }
     }
 
@@ -44,13 +52,7 @@ const CodeOutput: React.FC<Props> = ({ name, args, savedRegisters, addComments, 
                     block
                     onClick={e => handleClick(e)}
                     style={{ cursor: 'pointer', width: '100%' }}>
-                    {addComments ? blockComment : ''}
-                    {name ? name : 'Function:\n'}
-                    {stack(true, savedRegisters, saveRA) + '\n'}
-                    {copya0 ? createCopya0(copya0) + '\n' : ''}
-                    {'	# ---- MAIN FUNCTION BODY\n\n'}
-                    {stack(false, savedRegisters, saveRA) + '\n'}
-                    {'	ret'}
+                    {codeStr}
                 </Code>
             </Grid>
         </Grid.Container>
@@ -58,29 +60,31 @@ const CodeOutput: React.FC<Props> = ({ name, args, savedRegisters, addComments, 
     )
 }
 
+const code = (
+    name: string,
+    addComments: boolean,
+    blockComment: string,
+    savedRegisters: number,
+    saveRA: boolean,
+    copya0: number
+): string => `
+${addComments ? blockComment : ''}
+${name ? name : 'Function:\n'}
+${stack(true, savedRegisters, saveRA) + '\n'}
+${copya0 ? createCopya0(copya0) + '\n' : ''}
+${'	# ---- MAIN FUNCTION BODY\n\n'}
+${stack(false, savedRegisters, saveRA) + '\n'}
+${'	ret'}
+`
+
 // Checks if the navigator.permissions API is supported
 // if not, it displays that the user has to click to highlight text
 // if it is, it displays that the user can copy the code
 const ClipboardNote: React.FC = () => {
-    const [supported, setSupported] = useState(false);
-
-    // async useEffect 
-    // https://stackoverflow.com/a/53572588
-    useEffect(() => {
-        async function getPermissions() {
-            if (navigator.permissions) {
-                const permissions = await navigator.permissions.query({ name: "clipboard-write" });
-                setSupported(permissions.state === 'granted');
-            } else {
-                setSupported(false);
-            }
-        }
-
-        getPermissions()
-    }, [])
+    const { supported } = getNavPermissions();
 
     return (
-        <Note>
+        <Note style={{ width: '100%' }} type='success'>
             {supported ? 'Click on the highlighted code to copy it' : 'Click on the code to highlight it'}
         </Note>
     )
