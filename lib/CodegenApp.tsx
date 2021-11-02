@@ -1,4 +1,4 @@
-import { Input, Slider, Grid, Text, Spacer, Divider, Checkbox, Collapse } from '@geist-ui/react';
+import { Input, Slider, Grid, Text, Checkbox, Collapse, Code } from '@geist-ui/react';
 import React, { useState } from 'react';
 import CodeOutput from '@lib/CodeOutput';
 
@@ -8,12 +8,19 @@ const CodegenApp: React.FC<{}> = () => {
     const [name, setName] = useState('');
     const [args, setArgs] = useState(2);
     const [savedRegisters, setSavedRegisters] = useState(3);
+    const [saveRA, setSaveRA] = useState(true);
     const [addComments, setAddComments] = useState(true);
     const [copya0, setCopyA0] = useState(0);
 
-    const settings = { name, setName, args, setArgs, savedRegisters, setSavedRegisters, addComments, setAddComments };
+    const settings = {
+        name, setName,
+        args, setArgs,
+        savedRegisters, setSavedRegisters,
+        addComments, setAddComments,
+        saveRA, setSaveRA
+    };
     const advancedSettings = { copya0, setCopyA0, savedRegisters };
-    const codeOutputProps = { name, args, savedRegisters, addComments, copya0 };
+    const codeOutputProps = { name, args, savedRegisters, addComments, copya0, saveRA };
     return (
         <Grid.Container gap={4}>
             <Grid xs={24}>
@@ -42,6 +49,8 @@ interface OptionsProps {
     setSavedRegisters: React.Dispatch<React.SetStateAction<number>>;
     addComments: boolean;
     setAddComments: React.Dispatch<React.SetStateAction<boolean>>;
+    saveRA: boolean;
+    setSaveRA: React.Dispatch<React.SetStateAction<boolean>>;
 }
 const Options: React.FC<OptionsProps> = (props) => (
     <Grid.Container gap={5}>
@@ -79,7 +88,16 @@ const Options: React.FC<OptionsProps> = (props) => (
             </Grid.Container>
         </Grid>
         <Grid xs={24}>
-            <Checkbox checked={props.addComments} onChange={(e) => props.setAddComments(e.target.checked)}>Add Comments</Checkbox>
+            <Grid.Container gap={1} justify='center'>
+                <Grid xs={24}>
+                    <Checkbox checked={props.addComments} onChange={(e) => props.setAddComments(e.target.checked)}>Add Comments</Checkbox>
+                </Grid>
+                <Grid xs={24}>
+                    <Checkbox checked={props.saveRA} onChange={(e) => props.setSaveRA(e.target.checked)}>
+                        Save <Code>ra</Code>
+                    </Checkbox>
+                </Grid>
+            </Grid.Container>
         </Grid>
     </Grid.Container >
 )

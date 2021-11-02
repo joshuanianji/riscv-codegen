@@ -1,4 +1,4 @@
-import { Code, Fieldset } from '@geist-ui/react';
+import { Code, Grid, Note } from '@geist-ui/react';
 import Copy from '@geist-ui/react-icons/copy';
 
 
@@ -8,9 +8,10 @@ interface Props {
     savedRegisters: number;
     addComments: boolean;
     copya0: number;
+    saveRA: boolean;
 }
 
-const CodeOutput: React.FC<Props> = ({ name, args, savedRegisters, addComments, copya0 }) => {
+const CodeOutput: React.FC<Props> = ({ name, args, savedRegisters, addComments, copya0, saveRA }) => {
     const blockComment = createBlockComment(name, args, savedRegisters, copya0);
     // highlights the code on user click
     // https://developer.mozilla.org/en-US/docs/Web/API/Selection/selectAllChildren
@@ -19,36 +20,54 @@ const CodeOutput: React.FC<Props> = ({ name, args, savedRegisters, addComments, 
     }
 
     return (
-        <Code
-            block
-            onClick={e => handleClick(e)}
-            style={{ cursor: 'pointer' }}>
-            {addComments ? blockComment : ''}
-            {name ? name : 'Function:\n'}
-            {stack(true, savedRegisters) + '\n'}
-            {copya0 ? createCopya0(copya0) + '\n' : ''}
-            {'	# ---- MAIN FUNCTION BODY\n\n'}
-            {stack(false, savedRegisters) + '\n'}
-            {'	ret'}
-        </Code>
+        <Grid.Container>
+            <Grid xs={24}>
+                <Note type='success' style={{ width: '100%' }}>
+                    Click on the code to highlight it.
+                </Note>
+            </Grid>
+            <Grid xs={24}>
+                <Code
+                    block
+                    onClick={e => handleClick(e)}
+                    style={{ cursor: 'pointer', width: '100%' }}>
+                    {addComments ? blockComment : ''}
+                    {name ? name : 'Function:\n'}
+                    {stack(true, savedRegisters, saveRA) + '\n'}
+                    {copya0 ? createCopya0(copya0) + '\n' : ''}
+                    {'	# ---- MAIN FUNCTION BODY\n\n'}
+                    {stack(false, savedRegisters, saveRA) + '\n'}
+                    {'	ret'}
+                </Code>
+            </Grid>
+        </Grid.Container>
 
     )
 }
 
 // generates code for pushing/pulling to/from the stack
-const stack = (push: boolean, savedRegisters: number) => {
+const stack = (push: boolean, savedRegisters: number, saveRA: boolean) => {
     const instr = push ? 'sw' : 'lw';
     const comment = `	# ---- ${push ? 'Add elements to stack' : 'Restore elements from stack'}`
 
+    // if we save RA, we have to save an extra register
+    const actualRegisters = saveRA ? savedRegisters + 1 : savedRegisters;
+
     let res = comment + '\n';
-    res += push ? `	addi	sp, sp, -${savedRegisters * 4}\n` : '';
+    res += push ? `	addi	sp, sp, -${actualRegisters * 4}\n` : '';
+
+    // save/restore ra (if needed)
+    if (saveRA) {
+        res += `	${instr}	ra, 0(sp)\n`;
+    }
 
     // add register stuff
-    for (let i = 0; i < savedRegisters; i++) {
+    const start = saveRA ? 1 : 0;
+    for (let i = start; i < actualRegisters; i++) {
         res += `	${instr}	s${i}, ${4 * i}(sp)\n`;
     }
 
-    res += push ? '' : `	addi	sp, sp, ${savedRegisters * 4}\n`;
+    res += push ? '' : `	addi	sp, sp, ${actualRegisters * 4}\n`;
 
     return res;
 }
