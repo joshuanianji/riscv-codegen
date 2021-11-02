@@ -44,7 +44,7 @@ const Footer: React.FC = () => (
   <Page.Footer>
     <Grid.Container gap={2} justify='center'>
       <Grid xs={24} justify='center'>
-        <Link href='riscv-codegen.vercel.app' block>
+        <Link href='https://github.com/joshuanianji/riscv-codegen' block>
           By @joshuanianji
         </Link>
       </Grid>
