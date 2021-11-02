@@ -69,7 +69,7 @@ const code = (
     copya0: number
 ): string => (
     `${addComments ? blockComment : ''}
-${name ? name : 'Function:'}
+${name ? `${name}:` : 'Function:'}
 ${stack(true, savedRegisters, saveRA)}
 ${copya0 ? createCopya0(copya0) + '\n' : ''}
 ${'	# ---- MAIN FUNCTION BODY\n\n'}
@@ -160,8 +160,7 @@ ${argRegs}
 #
 # DESCRIPTION HERE
 # ${registerUsage}
-# -----------------------------------------------------------------------------
-`
+# -----------------------------------------------------------------------------`
 }
 
 export default CodeOutput;
