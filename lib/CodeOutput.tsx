@@ -1,4 +1,6 @@
-import { Code } from '@geist-ui/react';
+import { Code, Fieldset } from '@geist-ui/react';
+import Copy from '@geist-ui/react-icons/copy';
+
 
 interface Props {
     name: string;
@@ -10,17 +12,26 @@ interface Props {
 
 const CodeOutput: React.FC<Props> = ({ name, args, savedRegisters, addComments, copya0 }) => {
     const blockComment = createBlockComment(name, args, savedRegisters, copya0);
+    // highlights the code on user click
+    // https://developer.mozilla.org/en-US/docs/Web/API/Selection/selectAllChildren
+    const handleClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+        window.getSelection()?.selectAllChildren(e.currentTarget);
+    }
 
     return (
-        <Code block>
+        <Code
+            block
+            onClick={e => handleClick(e)}
+            style={{ cursor: 'pointer' }}>
             {addComments ? blockComment : ''}
             {name ? name : 'Function:\n'}
             {stack(true, savedRegisters) + '\n'}
             {copya0 ? createCopya0(copya0) + '\n' : ''}
-            {'	#---- MAIN FUNCTION BODY\n\n'}
+            {'	# ---- MAIN FUNCTION BODY\n\n'}
             {stack(false, savedRegisters) + '\n'}
             {'	ret'}
         </Code>
+
     )
 }
 
@@ -71,16 +82,16 @@ const createBlockComment = (name: string, args: number, savedRegisters: number, 
     } else {
         registerUsage = '# Register Usage:\n';
         registerUsage += Array.from(Array(savedRegisters).keys()).map(i => {
-            const isArg: boolean = i < copya0; // if it's just a copied argument. 
+            const isArg: boolean = i < copya0; // if it's just a copied argument.
             const end = isArg ? `a${i} (More desc. needed)` : '';
             return `# 	s${i}: ${end}`
         }).join('\n')
     }
 
     return `# -----------------------------------------------------------------------------
-# ${name ? name : 'Function'}: 
+# ${name ? name : 'Function'}:
 #
-# Args: 
+# Args:
 ${argRegs}
 #
 # DESCRIPTION HERE
