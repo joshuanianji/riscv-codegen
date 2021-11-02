@@ -1,5 +1,6 @@
 import { Input, Slider, Grid, Text, Spacer, Divider, Checkbox, Collapse } from '@geist-ui/react';
 import React, { useState } from 'react';
+import CodeOutput from '@lib/CodeOutput';
 
 // Main code for the app
 
@@ -12,15 +13,23 @@ const CodegenApp: React.FC<{}> = () => {
 
     const settings = { name, setName, args, setArgs, savedRegisters, setSavedRegisters, addComments, setAddComments };
     const advancedSettings = { copya0, setCopyA0, savedRegisters };
+    const codeOutputProps = { name, args, savedRegisters, addComments, copya0 };
     return (
-        <Collapse.Group style={{ width: '100%' }}>
-            <Collapse title='Settings' initialVisible>
-                <Options {...settings} />
-            </Collapse>
-            <Collapse title='Advanced Settings'>
-                <AdvancedOptions {...advancedSettings} />
-            </Collapse>
-        </Collapse.Group>
+        <Grid.Container gap={4}>
+            <Grid xs={24}>
+                <Collapse.Group style={{ width: '100%' }}>
+                    <Collapse title='Settings' initialVisible>
+                        <Options {...settings} />
+                    </Collapse>
+                    <Collapse title='Advanced Settings'>
+                        <AdvancedOptions {...advancedSettings} />
+                    </Collapse>
+                </Collapse.Group>
+            </Grid>
+            <Grid xs={24}>
+                <CodeOutput {...codeOutputProps} />
+            </Grid>
+        </Grid.Container>
     )
 }
 
