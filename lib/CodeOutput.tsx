@@ -9,14 +9,15 @@ interface Props {
 }
 
 const CodeOutput: React.FC<Props> = ({ name, args, savedRegisters, addComments, copya0 }) => {
-    const blockComment = createBlockComment(name, args, savedRegisters);
+    const blockComment = createBlockComment(name, args, savedRegisters, copya0);
 
     return (
         <Code block>
             {addComments ? blockComment : ''}
             {name ? name : 'Function:\n'}
             {stack(true, savedRegisters) + '\n'}
-            {'	# MAIN FUNCTION BODY\n\n'}
+            {copya0 ? createCopya0(copya0) + '\n' : ''}
+            {'	#---- MAIN FUNCTION BODY\n\n'}
             {stack(false, savedRegisters) + '\n'}
             {'	ret'}
         </Code>
@@ -26,7 +27,7 @@ const CodeOutput: React.FC<Props> = ({ name, args, savedRegisters, addComments, 
 // generates code for pushing/pulling to/from the stack
 const stack = (push: boolean, savedRegisters: number) => {
     const instr = push ? 'sw' : 'lw';
-    const comment = `	# ---- ${push ? 'Add elements to Stack' : 'Restore elements from Stack'}`
+    const comment = `	# ---- ${push ? 'Add elements to stack' : 'Restore elements from stack'}`
 
     let res = comment + '\n';
     res += push ? `	addi	sp, sp, -${savedRegisters * 4}\n` : '';
@@ -41,7 +42,19 @@ const stack = (push: boolean, savedRegisters: number) => {
     return res;
 }
 
-const createBlockComment = (name: string, args: number, savedRegisters: number) => {
+// Generates code for copying arguments (a regs) to saved regs (s regs)
+const createCopya0 = (copya0: number) => {
+    let res = `	# ---- Copying Arguments\n`;
+
+    for (let i = 0; i < copya0; i++) {
+        res += `	mv 	s${i}, a${i} 			# s${i} <- a${i}\n`
+    }
+
+    return res;
+}
+
+// Generates code for Block Comment
+const createBlockComment = (name: string, args: number, savedRegisters: number, copya0: number) => {
     let argRegs;
     let registerUsage;
 
@@ -57,7 +70,11 @@ const createBlockComment = (name: string, args: number, savedRegisters: number) 
         registerUsage = 0;
     } else {
         registerUsage = '# Register Usage:\n';
-        registerUsage += Array.from(Array(savedRegisters).keys()).map(i => `# 	s${i}: `).join('\n')
+        registerUsage += Array.from(Array(savedRegisters).keys()).map(i => {
+            const isArg: boolean = i < copya0; // if it's just a copied argument. 
+            const end = isArg ? `a${i} (More desc. needed)` : '';
+            return `# 	s${i}: ${end}`
+        }).join('\n')
     }
 
     return `# -----------------------------------------------------------------------------
