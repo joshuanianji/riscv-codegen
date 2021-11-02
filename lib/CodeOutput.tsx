@@ -1,6 +1,6 @@
 import { Code, Grid, Note, useToasts } from '@geist-ui/react';
 import Copy from '@geist-ui/react-icons/copy';
-import { getNavPermissions } from '@lib/NavigatorPermissionsProvider';
+import { useNavPermissions } from '@lib/NavigatorPermissionsProvider';
 import { useEffect, useState } from 'react';
 
 
@@ -14,7 +14,7 @@ interface Props {
 }
 
 const CodeOutput: React.FC<Props> = ({ name, args, savedRegisters, addComments, copya0, saveRA }) => {
-    const { supported } = getNavPermissions();
+    const { supported } = useNavPermissions();
     const [, setToasts] = useToasts();
 
     const blockComment = createBlockComment(name, args, savedRegisters, copya0);
@@ -81,7 +81,7 @@ ${'	ret'}
 // if not, it displays that the user has to click to highlight text
 // if it is, it displays that the user can copy the code
 const ClipboardNote: React.FC = () => {
-    const { supported } = getNavPermissions();
+    const { supported } = useNavPermissions();
 
     return (
         <Note style={{ width: '100%' }} type='success'>

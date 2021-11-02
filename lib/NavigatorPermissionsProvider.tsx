@@ -21,10 +21,12 @@ const NavigatorPermissionsProvider: React.FC = ({ children }) => {
     // https://stackoverflow.com/a/53572588
     // I'm getting a `Type '"clipboard-write"' is not assignable to type 'PermissionName'.ts(2322)` error,
     // not sure why it's happening, since MDN docs say it should be available, but Typescript doesn't have it
+    // I ended up using @ts-ignore :)
     useEffect(() => {
         async function getPermissions() {
             try {
                 if (navigator.permissions) {
+                    // @ts-ignore
                     const permissions = await navigator.permissions.query({ name: "clipboard-write" });
                     setSupported(permissions.state === 'granted');
                 } else {
@@ -48,9 +50,9 @@ const NavigatorPermissionsProvider: React.FC = ({ children }) => {
     )
 }
 
-const getNavPermissions = (): Context => {
+const useNavPermissions = (): Context => {
     const context = React.useContext(NavigatorPermissionsContext)
     return context
 }
 
-export { NavigatorPermissionsProvider, getNavPermissions }
+export { NavigatorPermissionsProvider, useNavPermissions }
