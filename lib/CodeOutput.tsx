@@ -67,15 +67,15 @@ const code = (
     savedRegisters: number,
     saveRA: boolean,
     copya0: number
-): string => `
-${addComments ? blockComment : ''}
-${name ? name : 'Function:\n'}
-${stack(true, savedRegisters, saveRA) + '\n'}
+): string => (
+    `${addComments ? blockComment : ''}
+${name ? name : 'Function:'}
+${stack(true, savedRegisters, saveRA)}
 ${copya0 ? createCopya0(copya0) + '\n' : ''}
 ${'	# ---- MAIN FUNCTION BODY\n\n'}
-${stack(false, savedRegisters, saveRA) + '\n'}
+${stack(false, savedRegisters, saveRA)}
 ${'	ret'}
-`
+`)
 
 // Checks if the navigator.permissions API is supported
 // if not, it displays that the user has to click to highlight text
@@ -142,9 +142,9 @@ const createBlockComment = (name: string, args: number, savedRegisters: number, 
 
     // register usage
     if (savedRegisters === 0) {
-        registerUsage = 0;
+        registerUsage = '';
     } else {
-        registerUsage = '# Register Usage:\n';
+        registerUsage = '\n# Register Usage:\n';
         registerUsage += Array.from(Array(savedRegisters).keys()).map(i => {
             const isArg: boolean = i < copya0; // if it's just a copied argument.
             const end = isArg ? `a${i} (More desc. needed)` : '';
@@ -159,8 +159,7 @@ const createBlockComment = (name: string, args: number, savedRegisters: number, 
 ${argRegs}
 #
 # DESCRIPTION HERE
-#
-${registerUsage}
+# ${registerUsage}
 # -----------------------------------------------------------------------------
 `
 }

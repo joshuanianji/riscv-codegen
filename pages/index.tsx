@@ -33,7 +33,7 @@ const Content: React.FC = () => (
       <Grid xs={24} justify='center'><Text h1>RISC-V Code Generator</Text></Grid>
       <Grid xs={24} justify='center'><Text h3 small>Function Definition Automation</Text></Grid>
       <Grid xs={24} height='4em'></Grid>
-      <Grid xs={20} md={16} lg={12}><CodegenApp /></Grid>
+      <Grid xs={24} md={20} lg={16}><CodegenApp /></Grid>
     </Grid.Container>
   </Page.Content>
 )
