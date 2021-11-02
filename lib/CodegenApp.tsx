@@ -5,12 +5,13 @@ import React, { useState } from 'react';
 
 const CodegenApp: React.FC<{}> = () => {
     const [name, setName] = useState('');
-    const [sliderValue, setSliderValue] = useState(3);
+    const [args, setArgs] = useState(2);
+    const [savedRegisters, setSavedRegisters] = useState(3);
     const [addComments, setAddComments] = useState(true);
     const [copya0, setCopyA0] = useState(0);
 
-    const settings = { name, setName, sliderValue, setSliderValue, addComments, setAddComments };
-    const advancedSettings = { copya0, setCopyA0, sliderValue };
+    const settings = { name, setName, args, setArgs, savedRegisters, setSavedRegisters, addComments, setAddComments };
+    const advancedSettings = { copya0, setCopyA0, savedRegisters };
     return (
         <Collapse.Group style={{ width: '100%' }}>
             <Collapse title='Settings' initialVisible>
@@ -26,8 +27,10 @@ const CodegenApp: React.FC<{}> = () => {
 interface OptionsProps {
     name: string;
     setName: React.Dispatch<React.SetStateAction<string>>;
-    sliderValue: number;
-    setSliderValue: React.Dispatch<React.SetStateAction<number>>;
+    args: number;
+    setArgs: React.Dispatch<React.SetStateAction<number>>;
+    savedRegisters: number;
+    setSavedRegisters: React.Dispatch<React.SetStateAction<number>>;
     addComments: boolean;
     setAddComments: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -40,8 +43,30 @@ const Options: React.FC<OptionsProps> = (props) => (
         </Grid>
         <Grid xs={24}>
             <Grid.Container gap={1} justify='center'>
-                <Grid xs={24}><SavedRegistersText registers={props.sliderValue} /></Grid>
-                <Grid xs={22}><Slider step={1} value={props.sliderValue} onChange={props.setSliderValue} min={0} max={12} showMarkers /></Grid>
+                <Grid xs={24}><Text h5>Arguments:</Text></Grid>
+                <Grid xs={23}>
+                    <Slider
+                        step={1}
+                        value={props.args}
+                        onChange={(e) => props.setArgs(e)}
+                        min={0}
+                        max={8}
+                        showMarkers />
+                </Grid>
+            </Grid.Container>
+        </Grid>
+        <Grid xs={24}>
+            <Grid.Container gap={1} justify='center'>
+                <Grid xs={24}><SavedRegistersText registers={props.savedRegisters} /></Grid>
+                <Grid xs={23}>
+                    <Slider
+                        step={1}
+                        value={props.savedRegisters}
+                        onChange={(e) => props.setSavedRegisters(e)}
+                        min={0}
+                        max={12}
+                        showMarkers />
+                </Grid>
             </Grid.Container>
         </Grid>
         <Grid xs={24}>
@@ -53,23 +78,24 @@ const Options: React.FC<OptionsProps> = (props) => (
 interface AdvancedOptionsProps {
     copya0: number;
     setCopyA0: React.Dispatch<React.SetStateAction<number>>;
-    sliderValue: number;
+    savedRegisters: number;
 }
 const AdvancedOptions: React.FC<AdvancedOptionsProps> = (props) => {
+    const disabled = props.savedRegisters === 0;
+    const fontType = disabled ? 'secondary' : 'default';
     return (
         <Grid.Container gap={5}>
             <Grid xs={24}>
                 <Grid.Container gap={1} justify='center'>
-                    <Grid xs={24}>Copy Arguments into saved registers</Grid>
-                    <Grid xs={22}>
+                    <Grid xs={24}><Text h5 type={fontType}>Copy Arguments into saved registers</Text></Grid>
+                    <Grid xs={23}>
                         <Slider
-                            step={1}
                             value={props.copya0}
                             onChange={props.setCopyA0}
                             min={0}
-                            max={Math.max(props.sliderValue, 1)}
+                            max={Math.max(props.savedRegisters, 1)}
                             showMarkers
-                            disabled={props.sliderValue === 0}
+                            disabled={disabled}
                         />
                     </Grid>
                 </Grid.Container>
@@ -80,11 +106,11 @@ const AdvancedOptions: React.FC<AdvancedOptionsProps> = (props) => {
 
 const SavedRegistersText: React.FC<{ registers: number }> = ({ registers }) => {
     if (registers === 0) {
-        return <Text h4>No registers saved (Not using stack)</Text>
+        return <Text h5>No registers saved (Not using stack)</Text>
     } else if (registers === 1) {
-        return <Text h4>1 register saved</Text>
+        return <Text h5>1 register saved</Text>
     } else {
-        return <Text h4>{registers} registers saved</Text>
+        return <Text h5>{registers} registers saved</Text>
     }
 }
 
